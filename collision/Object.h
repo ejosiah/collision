@@ -18,7 +18,8 @@ public:
 	}
 
 	virtual void draw(Shader& shader, const Camera& camera) const {
-		mat4 model = translate(mat4_cast(orientation), position);
+		mat4 model = mat4_cast(orientation);
+		model = translate(model, position);
 		shader.sendComputed(camera, model);
 		shape->draw(shader);
 	}
@@ -27,12 +28,23 @@ public:
 		draw(*shader, camera);
 	}
 
+	virtual void draw(Shader& shader, GlmCam& camera) const {
+		mat4 model = translate(mat4(1), position);
+		camera.model = model * mat4_cast(orientation);
+		shader.sendComputed(camera);
+		shape->draw(shader);
+	}
+
+	virtual void draw(GlmCam& camera) const {
+		draw(*shader, camera);
+	}
+
 	virtual void move(const vec3& amount) {
-		position += amount;
+		position += amount * 0.00011f;
 	}
 
 	virtual void rotate(const vec3& amount) {
-		rotate(amount.x, amount.y, amount.z);
+		rotate(amount.x * 0.01f, amount.y * 0.01f , amount.z * 0.01f);
 	}
 
 	virtual void rotate(float pitch, float yaw, float roll){
@@ -40,7 +52,7 @@ public:
 	}
 
 	virtual void update(float dt) {
-
+		this->dt = dt;
 	}
 
 	void setShader(Shader& shader) {
@@ -52,6 +64,8 @@ protected:
 	Shape* shape;
 	vec3 position;
 	Orientation orientation;
+	float angle = 30;
+	float dt;
 
 };
 

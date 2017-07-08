@@ -7,7 +7,8 @@
 
 using namespace std;
 using namespace glm;
-using namespace ncl::gl;
+using namespace ncl;
+using namespace gl;
 
 class CollisionTestScene;
 
@@ -23,6 +24,11 @@ class CollisionTestScene;
 class SelectedObjectController : public _3DMotionEventHandler {
 public:
 	virtual void onMotion(const _3DMotionEvent& e) {
+		string msg;
+		msg = "translation[" + to_string(e.translation.x) + ", " + to_string(e.translation.y) + ", " + to_string(e.translation.z) + "]";
+		logger.info(msg);
+		msg = "rotation[" + to_string(e.rotation.x) + ", " + to_string(e.rotation.y) + ", " + to_string(e.rotation.z) + "]";
+		logger.info(msg);
 		if (_object) {
 			_object->move(e.translation);
 			_object->rotate(e.rotation);
@@ -42,6 +48,7 @@ public:
 
 private:
 	Object* _object;
+	Logger logger = Logger::get("Object Controller");
 };
 
 
@@ -51,12 +58,14 @@ class CollisionTestScene : public Scene {
 public:
 	CollisionTestScene() : Scene("Collision Test") {
 		currentMode = CREATE;
+		delete _motionEventHandler;
 		_motionEventHandler = &objectController;
 	}
 
 	virtual void init() override {
 		cameraController = CameraController{ Mesurements{ float(_width), float(_height) }, Camera::SPECTATOR };
-		camera().lookAt({ 0, 1.0, 1 }, vec3(0), { 0, 1, 0 });
+		camera().lookAt({ 1.25, 1.0, 1 }, vec3(0), { 0, 1, 0 });
+		cam.view = lookAt({ 0, 1, 1 }, vec3(0), { 0, 1, 0 });
 		font = Font::Arial();
 
 		auto object = new SphereObject;
@@ -64,14 +73,14 @@ public:
 		//object->setShader(_shader);
 		teapot->setShader(_shader);
 	//	objects.push_back(teapot);
-
+		light[0].transform = true;
 		lightModel.colorMaterial = true;
 	}
 
 	virtual void display() override {
 		displayText();
 		for (auto object : objects) 
-			object->draw(cameraController.getCamera());
+			object->draw(cam);
 	}
 
 	virtual void update(float dt) override {
@@ -81,6 +90,7 @@ public:
 
 	virtual void resized() override {
 		cameraController.updateAspectRation(aspectRatio);
+		cam.projection = perspective(radians(60.0f), aspectRatio, 0.3f, 1000.0f);
 		font->resize(_width, _height);
 	}
 
@@ -121,6 +131,7 @@ public:
 			object->init();
 			object->setShader(_shader);
 			objects.push_back(object);
+			objectController.object(object);
 		}
 	}
 

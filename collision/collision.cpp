@@ -2,6 +2,11 @@
 //
 
 #include "stdafx.h"
+
+#ifndef CONNECT_3D
+#define CONNECT_3D
+#endif
+
 #include <ncl/gl/GlfwApp.h>
 #include "CollisionTestScene.h"
 

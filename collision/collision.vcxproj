@@ -71,8 +71,8 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>c:\Users\$(UserName)\OneDrive\cpp\include;$(IncludePath)</IncludePath>
-    <LibraryPath>c:\Users\$(UserName)\OneDrive\cpp\lib\debug;$(LibraryPath)</LibraryPath>
+    <IncludePath>c:\Users\$(UserName)\OneDrive\cpp\include;C:\Program Files %28x86%29\3Dconnexion\3DxWare SDK\Inc;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Program Files %28x86%29\3Dconnexion\3DxWare SDK\Lib\x86;c:\Users\$(UserName)\OneDrive\cpp\lib\debug;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>

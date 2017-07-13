@@ -5,6 +5,7 @@
 #include <glm/glm.hpp>
 #include <ncl/gl/orientation.h>
 #include <ncl/gl/Camera.h>
+#include <ncl/gl/UserCameraController.h>
 
 using namespace std;
 using namespace ncl::gl;
@@ -17,19 +18,20 @@ public:
 
 	}
 
-	virtual void draw(Shader& shader, const Camera& camera) const {
-		mat4 model = mat4_cast(orientation);
-		model = translate(model, position);
-		shader.sendComputed(camera, model);
+	virtual void draw(Shader& shader, const CameraController& camera) const {
+		mat4 model = translate(mat4(1), _position);
+		model = camera.getCamera().getMode() == Camera::ORBIT ? camera.modelTrans() * model : model;
+		model = model * mat4_cast(orientation);
+		shader.sendComputed(camera.getCamera(), model);
 		shape->draw(shader);
 	}
 
-	virtual void draw(const Camera& camera) const {
+	virtual void draw(const CameraController& camera) const {
 		draw(*shader, camera);
 	}
 
 	virtual void draw(Shader& shader, GlmCam& camera) const {
-		mat4 model = translate(mat4(1), position);
+		mat4 model = translate(mat4(1), _position);
 		camera.model = model * mat4_cast(orientation);
 		shader.sendComputed(camera);
 		shape->draw(shader);
@@ -40,7 +42,7 @@ public:
 	}
 
 	virtual void move(const vec3& amount) {
-		position += amount * 0.00011f;
+		_position += amount * 0.00011f;
 	}
 
 	virtual void rotate(const vec3& amount) {
@@ -59,10 +61,12 @@ public:
 		this->shader = &shader;
 	}
 
+	vec3 position() const { return _position;  }
+
 protected:
 	Shader* shader;
 	Shape* shape;
-	vec3 position;
+	vec3 _position;
 	Orientation orientation;
 	float angle = 30;
 	float dt;
@@ -72,8 +76,7 @@ protected:
 class SphereObject : public Object {
 public:
 	SphereObject(float r = 0.5f) {
-		shape = new Sphere(r, 50, 50);
-		shape->material().ambient = shape->material().diffuse = randomColor();
+		shape = new Sphere(r);
 	}
 };
 
@@ -81,6 +84,33 @@ class TeaPotObject : public Object {
 public:
 	TeaPotObject() {
 		shape = new Teapot(16);
-		shape->material().ambient = shape->material().diffuse = randomColor();
+	}
+};
+
+class CylinderObject : public Object {
+public:
+	CylinderObject() {
+		shape = new Cylinder;
+	}
+};
+
+class ConeObject : public Object {
+public:
+	ConeObject() {
+		shape = new Cone;
+	}
+};
+
+class TriangleObject : public Object {
+public:
+	TriangleObject() {
+		Mesh mesh;
+		mesh.positions.push_back({ -0.5, 0, 0 });
+		mesh.positions.push_back({ 0.5, 0, 0 });
+		mesh.positions.push_back({ 0, 1, 0 });
+		vec4 color = randomColor();
+		mesh.colors = vector<vec4>(3, color);
+		mesh.normals = vector<vec3>(3, { 0, 1, 0 });
+		shape = new ProvidedMesh(mesh);
 	}
 };
